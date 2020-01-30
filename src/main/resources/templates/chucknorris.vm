@@ -1,0 +1,18 @@
+<html>
+    <body>
+        #if ($resultSummary.isFailed())
+            <img id="chucknorris_img" src="${webResourceManager.getStaticResourcePrefix()}/download/resources/de.fraunhofer.fkie.caad.bamboo.chucknorris:chucknorris-resources/images/alert.jpg" />
+        #elseif ($resultSummary.isSuccessful())
+            <img id="chucknorris_img" src="${webResourceManager.getStaticResourcePrefix()}/download/resources/de.fraunhofer.fkie.caad.bamboo.chucknorris:chucknorris-resources/images/thumb_up.jpg" />
+        #else
+            <img id="chucknorris_img" src="${webResourceManager.getStaticResourcePrefix()}/download/resources/de.fraunhofer.fkie.caad.bamboo.chucknorris:chucknorris-resources/images/bad_ass.jpg" />
+        #end
+        <br />
+        <b>$joke</b>
+        <br />
+        <!--$action<br />
+        $plan<br />
+        $resultSummary<br />
+        $resultSummary.getBuildTime() -->
+    </body>
+</html>

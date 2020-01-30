@@ -1,0 +1,44 @@
+language: java
+jdk:
+- oraclejdk8
+dist: trusty
+env:
+  global:
+  - MOZ_HEADLESS=1
+  - MAVEN_OPTS="-Dorg.slf4j.simpleLogger.defaultLogLevel=warn --batch-mode"
+  - PATH=opt/atlassian-plugin-sdk/bin:opt/atlassian-plugin-sdk/apache-maven-*/bin:$PATH
+addons:
+  firefox: latest
+before_install:
+- rm -rf *.tgz*
+- wget -q https://marketplace.atlassian.com/download/plugins/atlassian-plugin-sdk-tgz -O plugin-sdk.tgz
+- rm -rf opt download geckodriver
+- mkdir -p opt
+- mkdir -p download
+- tar -xzf *plugin-sdk* -C download
+- mv download/*plugin-sdk* opt/atlassian-plugin-sdk
+- chmod a+x opt/atlassian-plugin-sdk/bin/*
+- chmod a+x opt/atlassian-plugin-sdk/apache-maven-*/bin/*
+- atlas-version $MAVEN_OPTS
+- wget https://github.com/mozilla/geckodriver/releases/download/v0.26.0/geckodriver-v0.26.0-linux64.tar.gz
+- mkdir -p geckodriver
+- tar -xzf geckodriver-v0.26.0-linux64.tar.gz -C geckodriver
+- export PATH=$PATH:$PWD/geckodriver
+install:
+- atlas-mvn integration-test $MAVEN_OPTS
+- atlas-mvn install $MAVEN_OPTS
+- printf " \# \\n \# TEST RESULTS \\n \# \\n"
+- cat target/group-bamboo-integration/tomcat**/surefire-reports/*.txt
+- cat target/surefire-reports/*.txt
+script:
+- atlas-package $MAVEN_OPTS
+deploy:
+  provider: releases
+  api_key:
+    secure: Y9KP6/bYu25FIAxI78XGuEpMpXoHyO5WIE7XM8a6DFvXMDgrIMhWlbxI9wgP6QXASzm3qxiP+tb0ccpROTHXZoC6RDpgPE5gTNo2j2SRrely0XDKBpL7vs7pEzdYw12TxSDJjKryTfMNpckut0IsYIlQ4xxO1pBbYtRjyQ7tH/tMnK+HCBVbT9Drtmkt53mszHBe33y39YBhsDh6FIRO2VEMnUDjPc7KTCVcqh48R2taIQHyEZkyf4BmQCtWM2/WEMP5h4HAFNX3lvEB5L9WeRmhgTpvbnt8Sq5DIlKAlQRUf0Mr5VrBV3zaM6QwWJFNVb7kg07/mPCRG57vULJCvSmqw/rL6K3O/2Bg1Ay63xxqmfae+C+i/W1brHXNCYWxbfu/3vWA6q8pMMyWVax0QCrwLXgZ2NuEBbq/iWKxP2QFND3t8vAx7yMkGdgK9FfCfVaVyL58JlHuEWU2MFtMIZr0YO7bqw3TV7sUSdOFHUtHF8iFoDKrpylfkhzP5R9yz9kzMS4EKGgVykhqk30OGyrczypO2AwE0hYV92h6J9+5Fj0TbAjUfQ5JP6NQXxy4H00mgvz8hPV9sxQhuiJsa1G2TSyuxk6aoXFYZcEmNTeeQ5ImVSFn/groCRF+WRWKWdaHlpq2hv86/vsJ24RYKjU4uLtVDHvANiAgpt422vg=
+  file_glob: true
+  file: target/chucknorris-*.jar
+  on:
+    repo: sknopp/bamboo-chuck-norris-plugin
+    tags: true
+  skip_cleanup: true
